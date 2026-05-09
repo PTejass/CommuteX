@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Student Transportation Recommendation & Analysis System — Submit your commute data and get intelligent transport mode recommendations with visual analytics.">
+    <title>TransitIQ — Smart Student Transportation</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Chart.js (for Phase 3) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+
+    <!-- App Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">🚌</span>
+            <span class="nav-title">Transit<span class="accent">IQ</span></span>
+        </div>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="#hero" class="nav-link active" data-section="hero">Home</a></li>
+            <li><a href="#form-section" class="nav-link" data-section="form-section">Survey</a></li>
+            <li><a href="#dashboard-section" class="nav-link" data-section="dashboard-section">Dashboard</a></li>
+            <li><a href="#recommendations-section" class="nav-link" data-section="recommendations-section">Recommendations</a></li>
+        </ul>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero" id="hero">
+        <div class="hero-bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Smart Student<br>
+                <span class="gradient-text">Transportation</span><br>
+                Analysis
+            </h1>
+            <p class="hero-subtitle">
+                Share your daily commute details and discover the optimal transport mode 
+                tailored to your distance, budget, weather, and travel style.
+            </p>
+            <div class="hero-cta">
+                <a href="#form-section" class="btn btn-primary" id="cta-survey">
+                    <span>Take the Survey</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+                <a href="#dashboard-section" class="btn btn-secondary" id="cta-dashboard">
+                    View Dashboard
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-responses">0</span>
+                    <span class="stat-label">Responses</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">6</span>
+                    <span class="stat-label">Transport Modes</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">3</span>
+                    <span class="stat-label">Chart Types</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SURVEY FORM SECTION ===== -->
+    <section class="section" id="form-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">📋 Data Collection</span>
+                <h2 class="section-title">Transportation Survey</h2>
+                <p class="section-desc">Help us understand student commute patterns. Your data powers smart recommendations!</p>
+            </div>
+
+            <form class="survey-form" id="survey-form" novalidate>
+                <div class="form-grid">
+                    <!-- Name -->
+                    <div class="form-group">
+                        <label for="input-name" class="form-label">Full Name</label>
+                        <input type="text" id="input-name" name="name" class="form-input" placeholder="e.g. Rahul Sharma" required>
+                        <span class="form-error" id="error-name"></span>
+                    </div>
+
+                    <!-- Age -->
+                    <div class="form-group">
+                        <label for="input-age" class="form-label">Age</label>
+                        <input type="number" id="input-age" name="age" class="form-input" placeholder="e.g. 20" min="10" max="60" required>
+                        <span class="form-error" id="error-age"></span>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="form-group">
+                        <label for="input-gender" class="form-label">Gender</label>
+                        <select id="input-gender" name="gender" class="form-input" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span class="form-error" id="error-gender"></span>
+                    </div>
+
+                    <!-- Distance -->
+                    <div class="form-group">
+                        <label for="input-distance" class="form-label">Distance to College (km)</label>
+                        <input type="number" id="input-distance" name="distance_km" class="form-input" placeholder="e.g. 8.5" min="0.1" max="100" step="0.1" required>
+                        <span class="form-error" id="error-distance"></span>
+                    </div>
+
+                    <!-- Transport Mode -->
+                    <div class="form-group">
+                        <label for="input-mode" class="form-label">Current Transport Mode</label>
+                        <select id="input-mode" name="transport_mode" class="form-input" required>
+                            <option value="">Select Mode</option>
+                            <option value="Bus">🚌 Bus</option>
+                            <option value="Bike">🏍️ Bike</option>
+                            <option value="Car">🚗 Car</option>
+                            <option value="Metro">🚇 Metro</option>
+                            <option value="Auto">🛺 Auto</option>
+                            <option value="Walking">🚶 Walking</option>
+                        </select>
+                        <span class="form-error" id="error-mode"></span>
+                    </div>
+
+                    <!-- Travel Time -->
+                    <div class="form-group">
+                        <label for="input-time" class="form-label">Travel Time (minutes)</label>
+                        <input type="number" id="input-time" name="travel_time_min" class="form-input" placeholder="e.g. 35" min="1" max="300" required>
+                        <span class="form-error" id="error-time"></span>
+                    </div>
+
+                    <!-- Monthly Cost -->
+                    <div class="form-group">
+                        <label for="input-cost" class="form-label">Monthly Cost (₹)</label>
+                        <input type="number" id="input-cost" name="monthly_cost" class="form-input" placeholder="e.g. 1500" min="0" max="50000" required>
+                        <span class="form-error" id="error-cost"></span>
+                    </div>
+
+                    <!-- Weather Preference -->
+                    <div class="form-group">
+                        <label for="input-weather" class="form-label">Weather Preference</label>
+                        <select id="input-weather" name="weather_preference" class="form-input" required>
+                            <option value="">Select Weather</option>
+                            <option value="Sunny">☀️ Sunny</option>
+                            <option value="Rainy">🌧️ Rainy</option>
+                            <option value="Any">🌤️ Any Weather</option>
+                        </select>
+                        <span class="form-error" id="error-weather"></span>
+                    </div>
+
+                    <!-- Travel Type -->
+                    <div class="form-group full-width">
+                        <label for="input-travel-type" class="form-label">Travel Type</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="travel_type" value="Solo" required>
+                                <span class="radio-custom"></span>
+                                <span>🧍 Solo</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="travel_type" value="Group">
+                                <span class="radio-custom"></span>
+                                <span>👥 Group</span>
+                            </label>
+                        </div>
+                        <span class="form-error" id="error-travel-type"></span>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg" id="btn-submit">
+                        <span>Submit Response</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    </button>
+                    <button type="reset" class="btn btn-ghost" id="btn-reset">Clear Form</button>
+                </div>
+
+                <!-- Toast notification area -->
+                <div class="toast-container" id="toast-container"></div>
+            </form>
+        </div>
+    </section>
+
+    <!-- ===== DASHBOARD SECTION (Phase 3 placeholder) ===== -->
+    <section class="section section-dark" id="dashboard-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">📊 Analytics</span>
+                <h2 class="section-title">Visualization Dashboard</h2>
+                <p class="section-desc">Explore student transportation patterns through interactive charts.</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="chart-card" id="chart-card-bar">
+                    <div class="chart-card-header">
+                        <h3>Mode Frequency</h3>
+                        <span class="chart-badge">Bar Chart</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="chart-bar"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card" id="chart-card-pie">
+                    <div class="chart-card-header">
+                        <h3>Mode Distribution</h3>
+                        <span class="chart-badge">Pie Chart</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="chart-pie"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card chart-card-wide" id="chart-card-scatter">
+                    <div class="chart-card-header">
+                        <h3>Distance vs Travel Time</h3>
+                        <span class="chart-badge">Scatter Plot</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="chart-scatter"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== RECOMMENDATIONS SECTION (Phase 3/4 placeholder) ===== -->
+    <section class="section" id="recommendations-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">🧠 Smart Insights</span>
+                <h2 class="section-title">Recommendations</h2>
+                <p class="section-desc">Get personalized transport mode suggestions based on your commute profile.</p>
+            </div>
+
+            <div class="reco-placeholder" id="reco-placeholder">
+                <div class="reco-placeholder-icon">🔮</div>
+                <p>Submit a survey response or use the What-If controls to see smart recommendations.</p>
+                <p class="reco-note">Coming in Phase 3 & 4</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer" id="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="nav-logo">🚌</span>
+                    <span class="nav-title">Transit<span class="accent">IQ</span></span>
+                </div>
+                <p class="footer-text">Smart Student Transportation Recommendation & Analysis System</p>
+                <p class="footer-copy">&copy; 2026 TransitIQ. Built for educational purposes.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- App Script -->
+    <script src="js/app.js"></script>
+</body>
+</html>

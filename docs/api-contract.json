@@ -1,0 +1,134 @@
+{
+  "apiVersion": "1.0.0",
+  "baseUrl": "http://localhost:3000/api",
+  "endpoints": {
+    "POST /submissions": {
+      "description": "Submit a student's transportation survey response",
+      "requestBody": {
+        "contentType": "application/json",
+        "schema": {
+          "name": { "type": "string", "required": true, "example": "Rahul Sharma" },
+          "age": { "type": "number", "required": true, "min": 10, "max": 60, "example": 20 },
+          "gender": { "type": "string", "required": true, "enum": ["Male", "Female", "Other"], "example": "Male" },
+          "distance_km": { "type": "number", "required": true, "min": 0.1, "max": 100, "example": 8.5 },
+          "transport_mode": { "type": "string", "required": true, "enum": ["Bus", "Bike", "Car", "Metro", "Auto", "Walking"], "example": "Bus" },
+          "travel_time_min": { "type": "number", "required": true, "min": 1, "max": 300, "example": 35 },
+          "monthly_cost": { "type": "number", "required": true, "min": 0, "max": 50000, "example": 1500 },
+          "weather_preference": { "type": "string", "required": true, "enum": ["Sunny", "Rainy", "Any"], "example": "Sunny" },
+          "travel_type": { "type": "string", "required": true, "enum": ["Solo", "Group"], "example": "Solo" }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Submission created successfully",
+          "body": {
+            "success": true,
+            "message": "Submission recorded successfully",
+            "data": {
+              "id": "uuid-string",
+              "name": "Rahul Sharma",
+              "created_at": "2026-05-09T10:00:00Z"
+            }
+          }
+        },
+        "400": {
+          "description": "Validation error",
+          "body": {
+            "success": false,
+            "message": "Validation failed",
+            "errors": ["age must be between 10 and 60", "transport_mode is required"]
+          }
+        },
+        "500": {
+          "description": "Server error",
+          "body": {
+            "success": false,
+            "message": "Internal server error"
+          }
+        }
+      }
+    },
+    "GET /recommendations": {
+      "description": "Get smart transport recommendations based on parameters",
+      "queryParameters": {
+        "distance_km": { "type": "number", "required": true, "example": 8.5 },
+        "weather": { "type": "string", "required": false, "enum": ["Sunny", "Rainy", "Any"], "default": "Any", "example": "Rainy" },
+        "travel_type": { "type": "string", "required": false, "enum": ["Solo", "Group"], "default": "Solo", "example": "Solo" }
+      },
+      "responses": {
+        "200": {
+          "description": "Recommendations returned successfully",
+          "body": {
+            "success": true,
+            "data": {
+              "recommendations": [
+                {
+                  "mode": "Metro",
+                  "score": 87.5,
+                  "estimated_cost": 800,
+                  "estimated_time_min": 25,
+                  "reason": "Best balance of cost and speed for 8.5 km"
+                },
+                {
+                  "mode": "Bus",
+                  "score": 75.2,
+                  "estimated_cost": 600,
+                  "estimated_time_min": 40,
+                  "reason": "Most economical option for your distance"
+                }
+              ],
+              "parameters_used": {
+                "distance_km": 8.5,
+                "weather": "Rainy",
+                "travel_type": "Solo"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GET /analytics": {
+      "description": "Get aggregated analytics data for the dashboard",
+      "queryParameters": {},
+      "responses": {
+        "200": {
+          "description": "Analytics data returned successfully",
+          "body": {
+            "success": true,
+            "data": {
+              "total_responses": 150,
+              "mode_frequency": {
+                "Bus": 45,
+                "Bike": 30,
+                "Car": 20,
+                "Metro": 35,
+                "Auto": 15,
+                "Walking": 5
+              },
+              "mode_distribution_percent": {
+                "Bus": 30.0,
+                "Bike": 20.0,
+                "Car": 13.3,
+                "Metro": 23.3,
+                "Auto": 10.0,
+                "Walking": 3.3
+              },
+              "statistics": {
+                "avg_distance_km": 7.2,
+                "median_distance_km": 6.5,
+                "avg_travel_time_min": 32,
+                "median_travel_time_min": 28,
+                "avg_monthly_cost": 1250,
+                "mode_most_common": "Bus"
+              },
+              "scatter_data": [
+                { "distance_km": 5.0, "travel_time_min": 20, "mode": "Bus" },
+                { "distance_km": 12.0, "travel_time_min": 45, "mode": "Metro" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
