@@ -1,0 +1,7 @@
+id,transport_mode,base_cost_per_km,avg_speed_kmh,weather_penalty_rainy,group_discount,comfort_score,eco_score
+1,Bus,3.00,20.0,1.10,0.80,5,8
+2,Bike,2.00,30.0,1.50,1.00,4,7
+3,Car,8.00,35.0,1.05,0.60,9,3
+4,Metro,2.50,40.0,1.00,0.85,7,9
+5,Auto,6.00,25.0,1.20,0.75,6,5
+6,Walking,0.00,5.0,2.00,1.00,3,10

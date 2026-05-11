@@ -295,7 +295,10 @@ form.addEventListener('submit', async (e) => {
             showToast('🎉 Response submitted successfully!', 'success');
             form.reset();
             clearValidationStyles();
-            updateResponseCount();
+
+            // Refresh dashboard + show recommendations based on submission
+            loadDashboard();
+            fetchRecommendations(data.distance_km, data.weather_preference, data.travel_type);
         } else {
             const errorMsg = result.errors
                 ? result.errors.join(', ')
@@ -328,22 +331,360 @@ document.getElementById('btn-reset').addEventListener('click', () => {
     clearValidationStyles();
 });
 
-// ========== Dynamic Response Count ==========
-async function updateResponseCount() {
+
+// ========== Chart.js Configuration ==========
+// Shared color palette for transport modes
+const MODE_COLORS = {
+    Bus:     { bg: 'rgba(99, 102, 241, 0.7)',  border: '#6366f1' },
+    Bike:    { bg: 'rgba(139, 92, 246, 0.7)',   border: '#8b5cf6' },
+    Car:     { bg: 'rgba(236, 72, 153, 0.7)',   border: '#ec4899' },
+    Metro:   { bg: 'rgba(6, 182, 212, 0.7)',    border: '#06b6d4' },
+    Auto:    { bg: 'rgba(245, 158, 11, 0.7)',   border: '#f59e0b' },
+    Walking: { bg: 'rgba(16, 185, 129, 0.7)',   border: '#10b981' },
+};
+
+const ALL_MODES = ['Bus', 'Bike', 'Car', 'Metro', 'Auto', 'Walking'];
+
+// Chart.js global defaults for dark theme
+function applyChartDefaults() {
+    if (typeof Chart === 'undefined') return;
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.1)';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+}
+
+// Hold chart instances so we can update/destroy them
+let barChart = null;
+let pieChart = null;
+let scatterChart = null;
+
+/**
+ * Create or update the Bar Chart (Mode Frequency)
+ */
+function renderBarChart(modeFrequency) {
+    const ctx = document.getElementById('chart-bar');
+    if (!ctx) return;
+
+    const labels = ALL_MODES;
+    const data = labels.map(m => modeFrequency[m] || 0);
+    const bgColors = labels.map(m => MODE_COLORS[m]?.bg || 'rgba(148, 163, 184, 0.5)');
+    const borderColors = labels.map(m => MODE_COLORS[m]?.border || '#94a3b8');
+
+    if (barChart) barChart.destroy();
+
+    barChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Number of Students',
+                data,
+                backgroundColor: bgColors,
+                borderColor: borderColors,
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleColor: '#f1f5f9',
+                    bodyColor: '#94a3b8',
+                    borderColor: 'rgba(99, 102, 241, 0.3)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    padding: 12,
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
+                    grid: { color: 'rgba(148, 163, 184, 0.08)' },
+                },
+                x: {
+                    grid: { display: false },
+                },
+            },
+        },
+    });
+}
+
+/**
+ * Create or update the Pie Chart (Mode Distribution %)
+ */
+function renderPieChart(modeDistribution) {
+    const ctx = document.getElementById('chart-pie');
+    if (!ctx) return;
+
+    const labels = ALL_MODES.filter(m => (modeDistribution[m] || 0) > 0);
+    const data = labels.map(m => modeDistribution[m]);
+    const bgColors = labels.map(m => MODE_COLORS[m]?.bg || 'rgba(148, 163, 184, 0.5)');
+    const borderColors = labels.map(m => MODE_COLORS[m]?.border || '#94a3b8');
+
+    // If no data yet, show all modes at 0
+    if (labels.length === 0) {
+        labels.push(...ALL_MODES);
+        data.push(...ALL_MODES.map(() => 0));
+        bgColors.push(...ALL_MODES.map(m => MODE_COLORS[m]?.bg));
+        borderColors.push(...ALL_MODES.map(m => MODE_COLORS[m]?.border));
+    }
+
+    if (pieChart) pieChart.destroy();
+
+    pieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{
+                data,
+                backgroundColor: bgColors,
+                borderColor: 'rgba(10, 14, 26, 0.8)',
+                borderWidth: 3,
+                hoverOffset: 12,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '55%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 16,
+                        usePointStyle: true,
+                        pointStyleWidth: 12,
+                        font: { size: 12 },
+                    },
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleColor: '#f1f5f9',
+                    bodyColor: '#94a3b8',
+                    borderColor: 'rgba(99, 102, 241, 0.3)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    padding: 12,
+                    callbacks: {
+                        label: (ctx) => ` ${ctx.label}: ${ctx.parsed}%`,
+                    },
+                },
+            },
+        },
+    });
+}
+
+/**
+ * Create or update the Scatter Chart (Distance vs Travel Time)
+ */
+function renderScatterChart(scatterData) {
+    const ctx = document.getElementById('chart-scatter');
+    if (!ctx) return;
+
+    // Group scatter points by mode
+    const datasets = ALL_MODES.map(mode => {
+        const points = scatterData.filter(p => p.mode === mode);
+        return {
+            label: mode,
+            data: points.map(p => ({ x: p.x, y: p.y })),
+            backgroundColor: MODE_COLORS[mode]?.bg || 'rgba(148, 163, 184, 0.5)',
+            borderColor: MODE_COLORS[mode]?.border || '#94a3b8',
+            borderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 9,
+        };
+    }).filter(ds => ds.data.length > 0);
+
+    if (scatterChart) scatterChart.destroy();
+
+    scatterChart = new Chart(ctx, {
+        type: 'scatter',
+        data: { datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 16,
+                        usePointStyle: true,
+                        pointStyleWidth: 12,
+                        font: { size: 12 },
+                    },
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleColor: '#f1f5f9',
+                    bodyColor: '#94a3b8',
+                    borderColor: 'rgba(99, 102, 241, 0.3)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    padding: 12,
+                    callbacks: {
+                        label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.x} km, ${ctx.parsed.y} min`,
+                    },
+                },
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Distance (km)',
+                        color: '#94a3b8',
+                        font: { weight: '600' },
+                    },
+                    grid: { color: 'rgba(148, 163, 184, 0.08)' },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Travel Time (min)',
+                        color: '#94a3b8',
+                        font: { weight: '600' },
+                    },
+                    grid: { color: 'rgba(148, 163, 184, 0.08)' },
+                },
+            },
+        },
+    });
+}
+
+
+// ========== Dashboard Data Loader ==========
+async function loadDashboard() {
     try {
         const response = await fetchFromApi(API_CONFIG.ENDPOINTS.ANALYTICS);
         const result = await response.json();
-        if (result.success && result.data) {
-            const countEl = document.getElementById('stat-responses');
-            if (countEl) {
-                animateCounter(countEl, parseInt(countEl.textContent) || 0, result.data.total_responses);
-            }
+
+        if (!result.success || !result.data) {
+            console.warn('Analytics API returned no data');
+            return;
         }
-    } catch {
-        // Silently fail — backend may not be running yet
+
+        const d = result.data;
+
+        // Update hero response count
+        const countEl = document.getElementById('stat-responses');
+        if (countEl) {
+            animateCounter(countEl, parseInt(countEl.textContent) || 0, d.total_responses);
+        }
+
+        // Render charts (Chart.js must be loaded)
+        if (typeof Chart !== 'undefined') {
+            applyChartDefaults();
+            renderBarChart(d.mode_frequency || {});
+            renderPieChart(d.mode_distribution_percent || {});
+            renderScatterChart(d.scatter_data || []);
+        } else {
+            console.warn('Chart.js not loaded yet — retrying in 1s');
+            setTimeout(loadDashboard, 1000);
+        }
+    } catch (err) {
+        console.error('Failed to load dashboard:', err);
     }
 }
 
+
+// ========== Recommendations Display ==========
+const MODE_ICONS = {
+    Bus: '🚌', Bike: '🏍️', Car: '🚗',
+    Metro: '🚇', Auto: '🛺', Walking: '🚶',
+};
+
+async function fetchRecommendations(distance_km, weather, travel_type) {
+    const container = document.getElementById('reco-placeholder');
+    if (!container) return;
+
+    // Show loading state
+    container.innerHTML = `
+        <div class="reco-loading">
+            <div class="spinner"></div>
+            <p>Calculating smart recommendations...</p>
+        </div>
+    `;
+
+    try {
+        const params = new URLSearchParams({
+            distance_km: distance_km.toString(),
+            weather: weather || 'Any',
+            travel_type: travel_type || 'Solo',
+        });
+
+        const response = await fetchFromApi(`${API_CONFIG.ENDPOINTS.RECOMMENDATIONS}?${params}`);
+        const result = await response.json();
+
+        if (!result.success || !result.data || !result.data.recommendations) {
+            container.innerHTML = `
+                <div class="reco-placeholder-icon">⚠️</div>
+                <p>Could not load recommendations. Try again later.</p>
+            `;
+            return;
+        }
+
+        const recs = result.data.recommendations;
+        const usedParams = result.data.parameters_used;
+
+        let html = `
+            <div class="reco-params">
+                <span class="reco-param-tag">📏 ${usedParams.distance_km} km</span>
+                <span class="reco-param-tag">${usedParams.weather === 'Rainy' ? '🌧️' : '☀️'} ${usedParams.weather}</span>
+                <span class="reco-param-tag">${usedParams.travel_type === 'Group' ? '👥' : '🧍'} ${usedParams.travel_type}</span>
+            </div>
+            <div class="reco-grid">
+        `;
+
+        recs.forEach((rec, index) => {
+            const icon = MODE_ICONS[rec.mode] || '🚐';
+            const rankClass = index === 0 ? 'reco-card--top' : '';
+            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+
+            html += `
+                <div class="reco-card ${rankClass}">
+                    <div class="reco-card-rank">${medal || `#${index + 1}`}</div>
+                    <div class="reco-card-icon">${icon}</div>
+                    <h4 class="reco-card-mode">${rec.mode}</h4>
+                    <div class="reco-card-score">
+                        <div class="score-ring" style="--score: ${rec.score}">
+                            <span>${rec.score}</span>
+                        </div>
+                        <span class="score-label">Score</span>
+                    </div>
+                    <div class="reco-card-stats">
+                        <div class="reco-stat">
+                            <span class="reco-stat-value">₹${rec.estimated_cost.toFixed(0)}</span>
+                            <span class="reco-stat-label">Est. Cost</span>
+                        </div>
+                        <div class="reco-stat">
+                            <span class="reco-stat-value">${rec.estimated_time_min.toFixed(0)} min</span>
+                            <span class="reco-stat-label">Est. Time</span>
+                        </div>
+                    </div>
+                    <p class="reco-card-reason">${rec.reason}</p>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        container.innerHTML = html;
+
+    } catch (err) {
+        console.error('Recommendations error:', err);
+        container.innerHTML = `
+            <div class="reco-placeholder-icon">❌</div>
+            <p>Could not connect to the server for recommendations.</p>
+        `;
+    }
+}
+
+
+// ========== Dynamic Response Count ==========
 /**
  * Animate a counter from start to end
  */
@@ -363,8 +704,6 @@ function animateCounter(el, start, end) {
     requestAnimationFrame(tick);
 }
 
-// Try fetching count on page load
-updateResponseCount();
 
 // ========== Intersection Observer for Scroll Animations ==========
 const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
@@ -386,5 +725,10 @@ document.querySelectorAll('.section-header, .chart-card, .survey-form, .reco-pla
     animateOnScroll.observe(el);
 });
 
+
+// ========== Initialize on Page Load ==========
+// Load dashboard data and charts
+loadDashboard();
+
 console.log('🚌 TransitIQ Frontend loaded successfully');
-console.log(`📡 Connected to Supabase directly`);
+console.log(`📡 API endpoint: ${API_CONFIG.BASE_URL}`);

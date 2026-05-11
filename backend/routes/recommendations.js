@@ -1,52 +1,122 @@
 /* =====================================================
    Recommendations Route — GET /api/recommendations
    Returns smart transport mode recommendations
-   (Full logic will be implemented in Phase 3)
    ===================================================== */
 
 const express = require('express');
 const router = express.Router();
+const supabase = require('../config/supabase');
 
-/**
- * GET /api/recommendations
- * Query params: distance_km (required), weather (optional), travel_type (optional)
- *
- * Phase 1: Returns a stub response with the expected structure.
- * Phase 3: Will implement the actual scoring algorithm.
- */
-router.get('/', (req, res) => {
-    const { distance_km, weather = 'Any', travel_type = 'Solo' } = req.query;
+router.get('/', async (req, res) => {
+    try {
+        const { distance_km, weather = 'Any', travel_type = 'Solo' } = req.query;
 
-    // Basic validation
-    if (!distance_km || isNaN(Number(distance_km))) {
-        return res.status(400).json({
+        // Basic validation
+        if (!distance_km || isNaN(Number(distance_km))) {
+            return res.status(400).json({
+                success: false,
+                message: 'distance_km query parameter is required and must be a number',
+            });
+        }
+
+        if (!supabase) {
+            return res.status(503).json({ success: false, message: 'Database not connected' });
+        }
+
+        const distance = parseFloat(distance_km);
+
+        // Fetch pricing coefficients
+        const { data: pricingData, error } = await supabase
+            .from('dummy_pricing')
+            .select('*');
+
+        if (error || !pricingData) {
+            console.error('Pricing data error:', error);
+            throw new Error('Failed to fetch pricing data');
+        }
+
+        const recommendations = pricingData.map(modeData => {
+            // 1. Calculate base time and cost
+            let estimated_time_min = (distance / parseFloat(modeData.avg_speed_kmh)) * 60;
+            let estimated_cost = distance * parseFloat(modeData.base_cost_per_km);
+
+            // 2. Apply weather penalty (if it's raining, time and cost might increase)
+            if (weather === 'Rainy') {
+                estimated_time_min *= parseFloat(modeData.weather_penalty_rainy);
+                estimated_cost *= parseFloat(modeData.weather_penalty_rainy);
+            }
+
+            // 3. Apply group discount (if traveling in a group, cost might decrease)
+            if (travel_type === 'Group') {
+                estimated_cost *= parseFloat(modeData.group_discount);
+            }
+
+            // Round to 2 decimals
+            estimated_time_min = Math.round(estimated_time_min * 100) / 100;
+            estimated_cost = Math.round(estimated_cost * 100) / 100;
+
+            // 4. Calculate a simplified smart score (0-100 scale)
+            // Normalizing time (assuming max reasonable commute 120 mins)
+            let timeScore = Math.max(0, 100 - (estimated_time_min / 120 * 100));
+            // Normalizing cost (assuming max reasonable daily cost 500)
+            let costScore = Math.max(0, 100 - (estimated_cost / 500 * 100));
+            // Walking is free, so costScore should be maxed out
+            if (estimated_cost === 0) costScore = 100;
+            
+            // Weight the scores (Time: 30%, Cost: 30%, Comfort: 20%, Eco: 20%)
+            const comfortScore = (parseInt(modeData.comfort_score, 10) * 10);
+            const ecoScore = (parseInt(modeData.eco_score, 10) * 10);
+            
+            const finalScore = 
+                (timeScore * 0.3) + 
+                (costScore * 0.3) + 
+                (comfortScore * 0.2) + 
+                (ecoScore * 0.2);
+
+            // Simple reasoning logic
+            let reason = 'Good balance of cost and time.';
+            if (weather === 'Rainy' && modeData.weather_penalty_rainy > 1.2) {
+                reason = 'Not ideal for rainy weather.';
+            } else if (travel_type === 'Group' && modeData.group_discount < 1.0) {
+                reason = 'Great for group travel due to cost discount.';
+            } else if (estimated_cost === 0) {
+                reason = 'Most cost-effective and eco-friendly option.';
+            } else if (timeScore > 80) {
+                reason = 'Fastest way to reach your destination.';
+            } else if (comfortScore >= 80) {
+                reason = 'Prioritizes maximum comfort for the journey.';
+            }
+
+            return {
+                mode: modeData.transport_mode,
+                score: Math.round(finalScore),
+                estimated_cost,
+                estimated_time_min,
+                reason,
+            };
+        });
+
+        // Sort by highest score first
+        recommendations.sort((a, b) => b.score - a.score);
+
+        return res.json({
+            success: true,
+            data: {
+                recommendations,
+                parameters_used: {
+                    distance_km: distance,
+                    weather,
+                    travel_type,
+                }
+            },
+        });
+    } catch (error) {
+        console.error('Recommendations route error:', error);
+        return res.status(500).json({
             success: false,
-            message: 'distance_km query parameter is required and must be a number',
+            message: 'Internal server error',
         });
     }
-
-    // Phase 1 stub: Return placeholder recommendations
-    // This will be replaced with real scoring logic in Phase 3
-    return res.json({
-        success: true,
-        data: {
-            recommendations: [
-                {
-                    mode: 'Bus',
-                    score: 0,
-                    estimated_cost: 0,
-                    estimated_time_min: 0,
-                    reason: 'Recommendation engine not yet implemented (Phase 3)',
-                },
-            ],
-            parameters_used: {
-                distance_km: parseFloat(distance_km),
-                weather,
-                travel_type,
-            },
-            _note: 'This is a stub response. Full recommendation logic coming in Phase 3.',
-        },
-    });
 });
 
 module.exports = router;
