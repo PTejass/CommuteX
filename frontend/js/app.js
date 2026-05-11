@@ -333,14 +333,14 @@ document.getElementById('btn-reset').addEventListener('click', () => {
 
 
 // ========== Chart.js Configuration ==========
-// Shared color palette for transport modes
+// Shared color palette for transport modes — Turquoise-Blue theme
 const MODE_COLORS = {
-    Bus:     { bg: 'rgba(99, 102, 241, 0.7)',  border: '#6366f1' },
-    Bike:    { bg: 'rgba(139, 92, 246, 0.7)',   border: '#8b5cf6' },
-    Car:     { bg: 'rgba(236, 72, 153, 0.7)',   border: '#ec4899' },
+    Bus:     { bg: 'rgba(20, 184, 166, 0.7)',   border: '#14b8a6' },
+    Bike:    { bg: 'rgba(14, 165, 233, 0.7)',   border: '#0ea5e9' },
+    Car:     { bg: 'rgba(244, 114, 182, 0.7)',  border: '#f472b6' },
     Metro:   { bg: 'rgba(6, 182, 212, 0.7)',    border: '#06b6d4' },
-    Auto:    { bg: 'rgba(245, 158, 11, 0.7)',   border: '#f59e0b' },
-    Walking: { bg: 'rgba(16, 185, 129, 0.7)',   border: '#10b981' },
+    Auto:    { bg: 'rgba(251, 191, 36, 0.7)',   border: '#fbbf24' },
+    Walking: { bg: 'rgba(52, 211, 153, 0.7)',   border: '#34d399' },
 };
 
 const ALL_MODES = ['Bus', 'Bike', 'Car', 'Metro', 'Auto', 'Walking'];
@@ -348,8 +348,8 @@ const ALL_MODES = ['Bus', 'Bike', 'Car', 'Metro', 'Auto', 'Walking'];
 // Chart.js global defaults for dark theme
 function applyChartDefaults() {
     if (typeof Chart === 'undefined') return;
-    Chart.defaults.color = '#94a3b8';
-    Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.1)';
+    Chart.defaults.color = '#8db8c7';
+    Chart.defaults.borderColor = 'rgba(20, 184, 166, 0.08)';
     Chart.defaults.font.family = "'Inter', sans-serif";
 }
 
