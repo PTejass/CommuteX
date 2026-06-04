@@ -1,5 +1,5 @@
 /* =====================================================
-   TransitIQ — Frontend Application Logic
+   CommuteX — Frontend Application Logic
    Smart Student Transportation System
    ===================================================== */
 
@@ -333,14 +333,14 @@ document.getElementById('btn-reset').addEventListener('click', () => {
 
 
 // ========== Chart.js Configuration ==========
-// Shared color palette for transport modes — Turquoise-Blue theme
+// Shared color palette for transport modes — Colorful theme
 const MODE_COLORS = {
-    Bus:     { bg: 'rgba(20, 184, 166, 0.7)',   border: '#14b8a6' },
-    Bike:    { bg: 'rgba(14, 165, 233, 0.7)',   border: '#0ea5e9' },
-    Car:     { bg: 'rgba(244, 114, 182, 0.7)',  border: '#f472b6' },
-    Metro:   { bg: 'rgba(6, 182, 212, 0.7)',    border: '#06b6d4' },
-    Auto:    { bg: 'rgba(251, 191, 36, 0.7)',   border: '#fbbf24' },
-    Walking: { bg: 'rgba(52, 211, 153, 0.7)',   border: '#34d399' },
+    Bus: { bg: 'rgba(59, 130, 246, 0.7)', border: '#3b82f6' },
+    Bike: { bg: 'rgba(245, 158, 11, 0.7)', border: '#f59e0b' },
+    Car: { bg: 'rgba(239, 68, 68, 0.7)', border: '#ef4444' },
+    Metro: { bg: 'rgba(168, 85, 247, 0.7)', border: '#a855f7' },
+    Auto: { bg: 'rgba(236, 72, 153, 0.7)', border: '#ec4899' },
+    Walking: { bg: 'rgba(16, 185, 129, 0.7)', border: '#10b981' },
 };
 
 const ALL_MODES = ['Bus', 'Bike', 'Car', 'Metro', 'Auto', 'Walking'];
@@ -349,7 +349,7 @@ const ALL_MODES = ['Bus', 'Bike', 'Car', 'Metro', 'Auto', 'Walking'];
 function applyChartDefaults() {
     if (typeof Chart === 'undefined') return;
     Chart.defaults.color = '#8db8c7';
-    Chart.defaults.borderColor = 'rgba(20, 184, 166, 0.08)';
+    Chart.defaults.borderColor = 'rgba(212, 175, 55, 0.08)';
     Chart.defaults.font.family = "'Inter', sans-serif";
 }
 
@@ -730,5 +730,5 @@ document.querySelectorAll('.section-header, .chart-card, .survey-form, .reco-pla
 // Load dashboard data and charts
 loadDashboard();
 
-console.log('🚌 TransitIQ Frontend loaded successfully');
+console.log('🚌 CommuteX Frontend loaded successfully');
 console.log(`📡 API endpoint: ${API_CONFIG.BASE_URL}`);

@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Smart Student Transportation Recommendation & Analysis System — Submit your commute data and get intelligent transport mode recommendations with visual analytics.">
-    <title>TransitIQ — Smart Student Transportation</title>
+    <meta name="description"
+        content="Smart Student Transportation Recommendation & Analysis System — Submit your commute data and get intelligent transport mode recommendations with visual analytics.">
+    <title>CommuteX — Smart Student Transportation</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <!-- Chart.js (for Phase 3) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
@@ -17,19 +20,21 @@
     <!-- App Styles -->
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
     <!-- ===== NAVIGATION ===== -->
     <nav class="navbar" id="navbar">
         <div class="nav-brand">
-            <span class="nav-logo">🚌</span>
-            <span class="nav-title">Transit<span class="accent">IQ</span></span>
+            <span class="nav-logo"></span>
+            <span class="nav-title">Commute<span class="accent">X</span></span>
         </div>
         <ul class="nav-links" id="nav-links">
             <li><a href="#hero" class="nav-link active" data-section="hero">Home</a></li>
             <li><a href="#form-section" class="nav-link" data-section="form-section">Survey</a></li>
             <li><a href="#dashboard-section" class="nav-link" data-section="dashboard-section">Dashboard</a></li>
-            <li><a href="#recommendations-section" class="nav-link" data-section="recommendations-section">Recommendations</a></li>
+            <li><a href="#recommendations-section" class="nav-link"
+                    data-section="recommendations-section">Recommendations</a></li>
         </ul>
         <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
             <span></span><span></span><span></span>
@@ -38,28 +43,20 @@
 
     <!-- ===== HERO SECTION ===== -->
     <section class="hero" id="hero">
-        <div class="hero-bg-shapes">
-            <div class="shape shape-1"></div>
-            <div class="shape shape-2"></div>
-            <div class="shape shape-3"></div>
-        </div>
         <div class="hero-content">
             <h1 class="hero-title">
-                Smart Student<br>
-                <span class="gradient-text">Transportation</span><br>
-                Analysis
+                Smart Student <span class="gradient-text">Transportation</span> Analysis
             </h1>
             <p class="hero-subtitle">
-                Share your daily commute details and discover the optimal transport mode 
+                Share your daily commute details and discover the optimal transport mode
                 tailored to your distance, budget, weather, and travel style.
             </p>
             <div class="hero-cta">
                 <a href="#form-section" class="btn btn-primary" id="cta-survey">
                     <span>Take the Survey</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </a>
-                <a href="#dashboard-section" class="btn btn-secondary" id="cta-dashboard">
-                    View Dashboard
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
                 </a>
             </div>
             <div class="hero-stats">
@@ -79,13 +76,43 @@
         </div>
     </section>
 
+    <!-- ===== ABOUT SECTION ===== -->
+    <section class="section section-dark" id="about-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">💡 About The Project</span>
+                <h2 class="section-title">Why CommuteX?</h2>
+                <p class="section-desc">We aim to revolutionize how students plan their daily commute by leveraging data-driven insights.</p>
+            </div>
+            
+            <div class="about-grid">
+                <div class="about-card">
+                    <div class="about-icon">🎯</div>
+                    <h3>Our Mission</h3>
+                    <p>To help students save time, money, and reduce environmental impact by finding the most optimal transport mode for their specific needs, factoring in distance, budget, and weather conditions.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">🧠</div>
+                    <h3>How It Works</h3>
+                    <p>Our smart system collects basic commute preferences through a quick survey. It then analyzes this data against typical transport metrics to generate personalized recommendations and insightful dashboards.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">📈</div>
+                    <h3>Data-Driven Insights</h3>
+                    <p>The interactive dashboard allows you to visualize overall student transportation trends, helping identify popular modes, cost distributions, and travel time correlations across the campus.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ===== SURVEY FORM SECTION ===== -->
     <section class="section" id="form-section">
         <div class="container">
             <div class="section-header">
                 <span class="section-tag">📋 Data Collection</span>
                 <h2 class="section-title">Transportation Survey</h2>
-                <p class="section-desc">Help us understand student commute patterns. Your data powers smart recommendations!</p>
+                <p class="section-desc">Help us understand student commute patterns. Your data powers smart
+                    recommendations!</p>
             </div>
 
             <form class="survey-form" id="survey-form" novalidate>
@@ -93,14 +120,16 @@
                     <!-- Name -->
                     <div class="form-group">
                         <label for="input-name" class="form-label">Full Name</label>
-                        <input type="text" id="input-name" name="name" class="form-input" placeholder="e.g. Rahul Sharma" required>
+                        <input type="text" id="input-name" name="name" class="form-input"
+                            placeholder="e.g. Rahul Sharma" required>
                         <span class="form-error" id="error-name"></span>
                     </div>
 
                     <!-- Age -->
                     <div class="form-group">
                         <label for="input-age" class="form-label">Age</label>
-                        <input type="number" id="input-age" name="age" class="form-input" placeholder="e.g. 20" min="10" max="60" required>
+                        <input type="number" id="input-age" name="age" class="form-input" placeholder="e.g. 20" min="10"
+                            max="60" required>
                         <span class="form-error" id="error-age"></span>
                     </div>
 
@@ -119,7 +148,8 @@
                     <!-- Distance -->
                     <div class="form-group">
                         <label for="input-distance" class="form-label">Distance to College (km)</label>
-                        <input type="number" id="input-distance" name="distance_km" class="form-input" placeholder="e.g. 8.5" min="0.1" max="100" step="0.1" required>
+                        <input type="number" id="input-distance" name="distance_km" class="form-input"
+                            placeholder="e.g. 8.5" min="0.1" max="100" step="0.1" required>
                         <span class="form-error" id="error-distance"></span>
                     </div>
 
@@ -141,14 +171,16 @@
                     <!-- Travel Time -->
                     <div class="form-group">
                         <label for="input-time" class="form-label">Travel Time (minutes)</label>
-                        <input type="number" id="input-time" name="travel_time_min" class="form-input" placeholder="e.g. 35" min="1" max="300" required>
+                        <input type="number" id="input-time" name="travel_time_min" class="form-input"
+                            placeholder="e.g. 35" min="1" max="300" required>
                         <span class="form-error" id="error-time"></span>
                     </div>
 
                     <!-- Monthly Cost -->
                     <div class="form-group">
                         <label for="input-cost" class="form-label">Monthly Cost (₹)</label>
-                        <input type="number" id="input-cost" name="monthly_cost" class="form-input" placeholder="e.g. 1500" min="0" max="50000" required>
+                        <input type="number" id="input-cost" name="monthly_cost" class="form-input"
+                            placeholder="e.g. 1500" min="0" max="50000" required>
                         <span class="form-error" id="error-cost"></span>
                     </div>
 
@@ -187,7 +219,10 @@
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary btn-lg" id="btn-submit">
                         <span>Submit Response</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                        </svg>
                     </button>
                     <button type="reset" class="btn btn-ghost" id="btn-reset">Clear Form</button>
                 </div>
@@ -264,10 +299,10 @@
             <div class="footer-content">
                 <div class="footer-brand">
                     <span class="nav-logo">🚌</span>
-                    <span class="nav-title">Transit<span class="accent">IQ</span></span>
+                    <span class="nav-title">Commute<span class="accent">X</span></span>
                 </div>
                 <p class="footer-text">Smart Student Transportation Recommendation & Analysis System</p>
-                <p class="footer-copy">&copy; 2026 TransitIQ. Built for educational purposes.</p>
+                <p class="footer-copy">&copy; 2026 CommuteX. Built for educational purposes.</p>
             </div>
         </div>
     </footer>
@@ -275,4 +310,5 @@
     <!-- App Script -->
     <script src="js/app.js"></script>
 </body>
+
 </html>
