@@ -14,6 +14,7 @@ const API_CONFIG = {
         SUBMISSIONS: '/submissions',
         RECOMMENDATIONS: '/recommendations',
         ANALYTICS: '/analytics',
+        NEARBY_TRANSIT: '/nearby-transit',
     },
 };
 
@@ -622,6 +623,12 @@ const MODE_ICONS = {
     Metro: '🚇', Auto: '🛺', Walking: '🚶',
 };
 
+// ========== Transit Proximity State ==========
+let transitProximity = {
+    nearestBusKm: null,
+    nearestMetroKm: null,
+};
+
 async function fetchRecommendations(distance_km, weather, travel_type) {
     const container = document.getElementById('reco-placeholder');
     if (!container) return;
@@ -640,6 +647,14 @@ async function fetchRecommendations(distance_km, weather, travel_type) {
             weather: weather || 'Any',
             travel_type: travel_type || 'Solo',
         });
+
+        // Include transit proximity if available
+        if (transitProximity.nearestBusKm != null) {
+            params.set('nearest_bus_km', transitProximity.nearestBusKm.toString());
+        }
+        if (transitProximity.nearestMetroKm != null) {
+            params.set('nearest_metro_km', transitProximity.nearestMetroKm.toString());
+        }
 
         const response = await fetchFromApi(`${API_CONFIG.ENDPOINTS.RECOMMENDATIONS}?${params}`);
         const result = await response.json();
@@ -669,11 +684,16 @@ async function fetchRecommendations(distance_km, weather, travel_type) {
             const rankClass = index === 0 ? 'reco-card--top' : '';
             const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
 
+            const boostBadge = rec.proximity_boost
+                ? `<span class="reco-boost-badge">📍 +${rec.proximity_boost} nearby</span>`
+                : '';
+
             html += `
                 <div class="reco-card ${rankClass}">
                     <div class="reco-card-rank">${medal || `#${index + 1}`}</div>
                     <div class="reco-card-icon">${icon}</div>
                     <h4 class="reco-card-mode">${rec.mode}</h4>
+                    ${boostBadge}
                     <div class="reco-card-score">
                         <div class="score-ring" style="--score: ${rec.score}">
                             <span>${rec.score}</span>
@@ -724,6 +744,12 @@ function getWhatIfParams() {
     return { distance, weather, travelType };
 }
 
+/** Helper — fetch recommendations with current What-If params */
+function refreshRecommendations() {
+    const { distance, weather, travelType } = getWhatIfParams();
+    fetchRecommendations(distance, weather, travelType);
+}
+
 /**
  * Update the slider fill gradient and displayed value label
  */
@@ -744,23 +770,191 @@ updateSliderUI();
 whatifDistanceSlider.addEventListener('input', updateSliderUI);
 
 // "Get Recommendations" button click
-btnWhatif.addEventListener('click', () => {
-    const { distance, weather, travelType } = getWhatIfParams();
-    fetchRecommendations(distance, weather, travelType);
-});
+btnWhatif.addEventListener('click', refreshRecommendations);
 
 // Also allow toggling the radio buttons to auto-refresh recommendations
 document.querySelectorAll('input[name="whatif-weather"], input[name="whatif-travel-type"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-        const { distance, weather, travelType } = getWhatIfParams();
-        fetchRecommendations(distance, weather, travelType);
-    });
+    radio.addEventListener('change', refreshRecommendations);
 });
 
 // Auto-fetch on slider release (mouseup/touchend) for a snappy feel
-whatifDistanceSlider.addEventListener('change', () => {
-    const { distance, weather, travelType } = getWhatIfParams();
-    fetchRecommendations(distance, weather, travelType);
+whatifDistanceSlider.addEventListener('change', refreshRecommendations);
+
+
+// ========== Location & Transit Proximity ==========
+const btnUseLocation = document.getElementById('btn-use-location');
+const locationStatus = document.getElementById('location-status');
+const locationCoords = document.getElementById('location-coords');
+const coordBadge = document.getElementById('coord-badge');
+const transitResults = document.getElementById('transit-results');
+const inputLat = document.getElementById('input-lat');
+const inputLng = document.getElementById('input-lng');
+const btnSearchCoords = document.getElementById('btn-search-coords');
+
+function setLocationStatus(text, state) {
+    locationStatus.textContent = text;
+    locationStatus.className = `location-status ${state || ''}`;
+}
+
+/**
+ * Update the transit result cards in the UI
+ */
+function renderTransitResults(data) {
+    transitResults.style.display = 'flex';
+
+    const busCard = document.getElementById('transit-bus');
+    const busName = document.getElementById('transit-bus-name');
+    const busDist = document.getElementById('transit-bus-dist');
+
+    const metroCard = document.getElementById('transit-metro');
+    const metroName = document.getElementById('transit-metro-name');
+    const metroDist = document.getElementById('transit-metro-dist');
+
+    const searchRadiusText = data.search_radius_km ? `> ${data.search_radius_km} km` : '> 2 km';
+
+    if (data.nearest_bus_stop) {
+        busName.textContent = data.nearest_bus_stop.name;
+        busDist.textContent = `${data.nearest_bus_stop.distance_km} km`;
+        busCard.className = `transit-card ${data.nearest_bus_stop.distance_km <= 1 ? 'close' : 'far'}`;
+        transitProximity.nearestBusKm = data.nearest_bus_stop.distance_km;
+    } else {
+        busName.textContent = 'No nearby bus stop';
+        busDist.textContent = searchRadiusText;
+        busCard.className = 'transit-card not-found';
+        transitProximity.nearestBusKm = null;
+    }
+
+    if (data.nearest_metro) {
+        metroName.textContent = data.nearest_metro.name;
+        metroDist.textContent = `${data.nearest_metro.distance_km} km`;
+        metroCard.className = `transit-card ${data.nearest_metro.distance_km <= 1 ? 'close' : 'far'}`;
+        transitProximity.nearestMetroKm = data.nearest_metro.distance_km;
+    } else {
+        metroName.textContent = 'No nearby metro station';
+        metroDist.textContent = searchRadiusText;
+        metroCard.className = 'transit-card not-found';
+        transitProximity.nearestMetroKm = null;
+    }
+}
+
+/**
+ * Fetch nearby transit stops from the backend
+ */
+async function lookupNearbyTransit(lat, lng) {
+    setLocationStatus('Searching for nearby stops...', 'searching');
+
+    try {
+        const params = new URLSearchParams({ lat: lat.toString(), lng: lng.toString() });
+        const response = await fetchFromApi(`${API_CONFIG.ENDPOINTS.NEARBY_TRANSIT}?${params}`);
+        const result = await response.json();
+
+        if (!result.success || !result.data) {
+            setLocationStatus('Could not find transit stops.', 'error');
+            return;
+        }
+
+        const stopsFound = (result.data.nearest_bus_stop ? 1 : 0) + (result.data.nearest_metro ? 1 : 0);
+        setLocationStatus(
+            stopsFound > 0
+                ? `Found ${result.data.total_stops_found} transit stop(s) nearby!`
+                : 'No transit stops found within 2 km.',
+            stopsFound > 0 ? 'found' : 'error'
+        );
+
+        renderTransitResults(result.data);
+
+        // Auto-refresh recommendations with new proximity data
+        refreshRecommendations();
+
+    } catch (err) {
+        console.error('Transit lookup error:', err);
+        setLocationStatus('Failed to search — is the backend running?', 'error');
+    }
+}
+
+/**
+ * Handle manual coordinates search
+ */
+btnSearchCoords.addEventListener('click', () => {
+    const latVal = parseFloat(inputLat.value);
+    const lngVal = parseFloat(inputLng.value);
+
+    if (isNaN(latVal) || isNaN(lngVal)) {
+        showToast('Please enter valid numbers for Latitude and Longitude.', 'error');
+        setLocationStatus('Invalid coordinates entered.', 'error');
+        return;
+    }
+
+    if (latVal < -90 || latVal > 90 || lngVal < -180 || lngVal > 180) {
+        showToast('Latitude must be -90 to 90, Longitude must be -180 to 180.', 'error');
+        setLocationStatus('Coordinates out of range.', 'error');
+        return;
+    }
+
+    // Show coordinates badge
+    coordBadge.textContent = `📍 ${latVal.toFixed(4)}, ${lngVal.toFixed(4)}`;
+    locationCoords.style.display = 'block';
+
+    setLocationStatus('Searching nearby transit...', 'searching');
+    lookupNearbyTransit(latVal, lngVal);
+});
+
+// Trigger search on pressing Enter in coordinate fields
+[inputLat, inputLng].forEach(input => {
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            btnSearchCoords.click();
+        }
+    });
+});
+
+/**
+ * Handle "Use My Location" button click
+ */
+btnUseLocation.addEventListener('click', () => {
+    if (!('geolocation' in navigator)) {
+        setLocationStatus('Geolocation is not supported by your browser.', 'error');
+        return;
+    }
+
+    // Show loading state
+    btnUseLocation.classList.add('locating');
+    setLocationStatus('Getting your location...', 'searching');
+
+    navigator.geolocation.getCurrentPosition(
+        // Success
+        (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            // Autofill coordinate fields
+            inputLat.value = lat.toFixed(5);
+            inputLng.value = lng.toFixed(5);
+
+            // Show coordinates
+            coordBadge.textContent = `📍 ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            locationCoords.style.display = 'block';
+
+            btnUseLocation.classList.remove('locating');
+            setLocationStatus('Location detected!', 'found');
+
+            // Look up nearby transit
+            lookupNearbyTransit(lat, lng);
+        },
+        // Error
+        (error) => {
+            btnUseLocation.classList.remove('locating');
+            const messages = {
+                1: 'Location permission denied. Please allow location access.',
+                2: 'Position unavailable. Try again.',
+                3: 'Location request timed out. Try again.',
+            };
+            setLocationStatus(messages[error.code] || 'Could not get location.', 'error');
+        },
+        // Options
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
 });
 
 

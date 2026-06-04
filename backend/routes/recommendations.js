@@ -9,7 +9,7 @@ const supabase = require('../config/supabase');
 
 router.get('/', async (req, res) => {
     try {
-        const { distance_km, weather = 'Any', travel_type = 'Solo' } = req.query;
+        const { distance_km, weather = 'Any', travel_type = 'Solo', nearest_bus_km, nearest_metro_km } = req.query;
 
         // Basic validation
         if (!distance_km || isNaN(Number(distance_km))) {
@@ -73,26 +73,45 @@ router.get('/', async (req, res) => {
                 (comfortScore * 0.2) + 
                 (ecoScore * 0.2);
 
+            // 5. Apply transit proximity bonus (if location data provided)
+            let proximityBonus = 0;
+            let proximityReason = null;
+            const busDist = nearest_bus_km != null ? parseFloat(nearest_bus_km) : null;
+            const metroDist = nearest_metro_km != null ? parseFloat(nearest_metro_km) : null;
+
+            if (modeData.transport_mode === 'Bus' && busDist != null && !isNaN(busDist) && busDist <= 1.0) {
+                proximityBonus = busDist <= 0.5 ? 20 : 15;
+                proximityReason = `A bus stop is just ${busDist} km from your location!`;
+            } else if (modeData.transport_mode === 'Metro' && metroDist != null && !isNaN(metroDist) && metroDist <= 1.0) {
+                proximityBonus = metroDist <= 0.5 ? 20 : 15;
+                proximityReason = `A metro station is just ${metroDist} km from your location!`;
+            }
+
+            const boostedScore = Math.min(100, finalScore + proximityBonus);
+
             // Simple reasoning logic
-            let reason = 'Good balance of cost and time.';
-            if (weather === 'Rainy' && modeData.weather_penalty_rainy > 1.2) {
-                reason = 'Not ideal for rainy weather.';
-            } else if (travel_type === 'Group' && modeData.group_discount < 1.0) {
-                reason = 'Great for group travel due to cost discount.';
-            } else if (estimated_cost === 0) {
-                reason = 'Most cost-effective and eco-friendly option.';
-            } else if (timeScore > 80) {
-                reason = 'Fastest way to reach your destination.';
-            } else if (comfortScore >= 80) {
-                reason = 'Prioritizes maximum comfort for the journey.';
+            let reason = proximityReason || 'Good balance of cost and time.';
+            if (!proximityReason) {
+                if (weather === 'Rainy' && modeData.weather_penalty_rainy > 1.2) {
+                    reason = 'Not ideal for rainy weather.';
+                } else if (travel_type === 'Group' && modeData.group_discount < 1.0) {
+                    reason = 'Great for group travel due to cost discount.';
+                } else if (estimated_cost === 0) {
+                    reason = 'Most cost-effective and eco-friendly option.';
+                } else if (timeScore > 80) {
+                    reason = 'Fastest way to reach your destination.';
+                } else if (comfortScore >= 80) {
+                    reason = 'Prioritizes maximum comfort for the journey.';
+                }
             }
 
             return {
                 mode: modeData.transport_mode,
-                score: Math.round(finalScore),
+                score: Math.round(boostedScore),
                 estimated_cost,
                 estimated_time_min,
                 reason,
+                proximity_boost: proximityBonus > 0 ? proximityBonus : undefined,
             };
         });
 

@@ -11,6 +11,7 @@ const cors = require('cors');
 const submissionsRouter = require('./routes/submissions');
 const recommendationsRouter = require('./routes/recommendations');
 const analyticsRouter = require('./routes/analytics');
+const nearbyTransitRouter = require('./routes/nearby-transit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -49,6 +50,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/submissions', submissionsRouter);
 app.use('/api/recommendations', recommendationsRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/nearby-transit', nearbyTransitRouter);
 
 // ========== 404 Handler ==========
 app.use((req, res) => {

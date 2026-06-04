@@ -1051,6 +1051,26 @@ select.form-input {
     margin-top: var(--sp-2);
 }
 
+/* Proximity boost badge */
+.reco-boost-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    color: var(--clr-success);
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 2px var(--sp-3);
+    border-radius: var(--radius-full);
+    animation: fadeInBadge 0.4s ease;
+}
+
+@keyframes fadeInBadge {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
 /* ---------- WHAT-IF SCENARIO PANEL ---------- */
 .whatif-panel {
     max-width: 800px;
@@ -1130,6 +1150,205 @@ select.form-input {
     text-align: center;
     border: 1px solid rgba(14, 165, 233, 0.2);
     transition: var(--transition-fast);
+}
+
+/* Location Input */
+.location-input-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+}
+
+.coords-inputs {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+}
+
+.location-coord-field {
+    width: 145px;
+    padding: var(--sp-2) var(--sp-3);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-md);
+    background: var(--clr-bg-input);
+    color: #082f49;
+    font-size: var(--fs-sm);
+    transition: var(--transition-fast);
+}
+
+[data-theme="dark"] .location-coord-field {
+    color: #f8fafc;
+}
+
+.location-coord-field::placeholder {
+    color: #0369a1;
+}
+
+[data-theme="dark"] .location-coord-field::placeholder {
+    color: #94a3b8;
+}
+
+.location-coord-field:focus {
+    border-color: var(--clr-border-focus);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+    outline: none;
+}
+
+.location-or-separator {
+    font-size: var(--fs-xs);
+    color: var(--clr-text-muted);
+    font-weight: var(--fw-semibold);
+    text-transform: uppercase;
+    margin: 0 var(--sp-1);
+}
+
+.location-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-5);
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+    transition: all var(--transition-base);
+}
+
+.location-btn:hover {
+    border-color: var(--clr-accent-1);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.location-btn.locating {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.location-btn.locating svg {
+    animation: spin 0.8s linear infinite;
+}
+
+.location-status {
+    font-size: var(--fs-xs);
+    color: var(--clr-text-muted);
+    transition: var(--transition-fast);
+}
+
+.location-status.searching {
+    color: var(--clr-accent-1);
+}
+
+.location-status.found {
+    color: var(--clr-success);
+}
+
+.location-status.error {
+    color: var(--clr-error);
+}
+
+.location-coords {
+    margin-top: var(--sp-1);
+}
+
+.coord-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-medium);
+    color: var(--clr-text-muted);
+    background: rgba(14, 165, 233, 0.08);
+    border: 1px solid rgba(14, 165, 233, 0.15);
+    padding: var(--sp-1) var(--sp-3);
+    border-radius: var(--radius-full);
+}
+
+/* Transit Proximity Result Cards */
+.transit-results {
+    display: flex;
+    gap: var(--sp-3);
+    margin-top: var(--sp-2);
+    flex-wrap: wrap;
+}
+
+.transit-card {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-lg);
+    background: var(--clr-bg-input);
+    transition: all var(--transition-base);
+}
+
+.transit-card:hover {
+    border-color: rgba(14, 165, 233, 0.3);
+    box-shadow: 0 2px 12px rgba(14, 165, 233, 0.08);
+}
+
+.transit-card.close {
+    border-color: rgba(16, 185, 129, 0.4);
+    background: rgba(16, 185, 129, 0.06);
+}
+
+.transit-card.far {
+    border-color: rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.04);
+}
+
+.transit-card.not-found {
+    opacity: 0.5;
+}
+
+.transit-card-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.transit-card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.transit-card-label {
+    font-size: var(--fs-xs);
+    color: var(--clr-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.transit-card-name {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--clr-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.transit-card-distance {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+    color: var(--clr-accent-1);
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: var(--sp-1) var(--sp-2);
+    border-radius: var(--radius-sm);
+    background: rgba(14, 165, 233, 0.1);
+}
+
+.transit-card.close .transit-card-distance {
+    color: var(--clr-success);
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.transit-card.far .transit-card-distance {
+    color: var(--clr-warning);
+    background: rgba(245, 158, 11, 0.1);
 }
 
 /* Custom Range Slider */
