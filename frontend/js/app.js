@@ -348,9 +348,9 @@ const ALL_MODES = ['Bus', 'Bike', 'Car', 'Metro', 'Auto', 'Walking'];
 // Chart.js global defaults for dark theme
 function applyChartDefaults() {
     if (typeof Chart === 'undefined') return;
-    Chart.defaults.color = '#8db8c7';
-    Chart.defaults.borderColor = 'rgba(212, 175, 55, 0.08)';
-    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#64748b';
+    Chart.defaults.borderColor = 'rgba(14, 165, 233, 0.1)';
+    Chart.defaults.font.family = "'Poppins', sans-serif";
 }
 
 // Hold chart instances so we can update/destroy them
