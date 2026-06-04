@@ -303,7 +303,7 @@
         </div>
     </section>
 
-    <!-- ===== RECOMMENDATIONS SECTION (Phase 3/4 placeholder) ===== -->
+    <!-- ===== RECOMMENDATIONS SECTION ===== -->
     <section class="section" id="recommendations-section">
         <div class="container">
             <div class="section-header">
@@ -312,10 +312,95 @@
                 <p class="section-desc">Get personalized transport mode suggestions based on your commute profile.</p>
             </div>
 
-            <div class="reco-placeholder" id="reco-placeholder">
-                <div class="reco-placeholder-icon">🔮</div>
-                <p>Submit a survey response or use the What-If controls to see smart recommendations.</p>
-                <p class="reco-note">Coming in Phase 3 & 4</p>
+            <!-- What-If Scenario Controls -->
+            <div class="whatif-panel" id="whatif-panel">
+                <div class="whatif-header">
+                    <div class="whatif-icon">🔮</div>
+                    <div>
+                        <h3 class="whatif-title">What-If Scenario Explorer</h3>
+                        <p class="whatif-subtitle">Adjust the parameters below and see how recommendations change in real time.</p>
+                    </div>
+                </div>
+
+                <div class="whatif-controls">
+                    <!-- Distance Slider -->
+                    <div class="whatif-group" id="whatif-distance-group">
+                        <label class="whatif-label" for="whatif-distance">
+                            📏 Distance to College
+                            <span class="whatif-value" id="whatif-distance-value">10 km</span>
+                        </label>
+                        <input type="range" id="whatif-distance" class="whatif-slider" min="1" max="50" step="0.5" value="10">
+                        <div class="whatif-range-labels">
+                            <span>1 km</span>
+                            <span>25 km</span>
+                            <span>50 km</span>
+                        </div>
+                    </div>
+
+                    <!-- Weather Toggle -->
+                    <div class="whatif-group" id="whatif-weather-group">
+                        <label class="whatif-label">🌤️ Weather Condition</label>
+                        <div class="whatif-toggle-group">
+                            <label class="whatif-toggle-option">
+                                <input type="radio" name="whatif-weather" value="Sunny" checked>
+                                <span class="whatif-toggle-btn">
+                                    <span class="whatif-toggle-icon">☀️</span>
+                                    Sunny
+                                </span>
+                            </label>
+                            <label class="whatif-toggle-option">
+                                <input type="radio" name="whatif-weather" value="Rainy">
+                                <span class="whatif-toggle-btn">
+                                    <span class="whatif-toggle-icon">🌧️</span>
+                                    Rainy
+                                </span>
+                            </label>
+                            <label class="whatif-toggle-option">
+                                <input type="radio" name="whatif-weather" value="Any">
+                                <span class="whatif-toggle-btn">
+                                    <span class="whatif-toggle-icon">🌤️</span>
+                                    Any
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Travel Type Toggle -->
+                    <div class="whatif-group" id="whatif-travel-type-group">
+                        <label class="whatif-label">👥 Travel Type</label>
+                        <div class="whatif-toggle-group">
+                            <label class="whatif-toggle-option">
+                                <input type="radio" name="whatif-travel-type" value="Solo" checked>
+                                <span class="whatif-toggle-btn">
+                                    <span class="whatif-toggle-icon">🧍</span>
+                                    Solo
+                                </span>
+                            </label>
+                            <label class="whatif-toggle-option">
+                                <input type="radio" name="whatif-travel-type" value="Group">
+                                <span class="whatif-toggle-btn">
+                                    <span class="whatif-toggle-icon">👥</span>
+                                    Group
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="whatif-actions">
+                    <button class="btn btn-primary btn-lg" id="btn-whatif">
+                        <span>Get Recommendations</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recommendation Results -->
+            <div class="reco-results" id="reco-placeholder">
+                <div class="reco-placeholder-icon">💡</div>
+                <p>Adjust the What-If controls above and click <strong>Get Recommendations</strong> to explore scenarios.</p>
             </div>
         </div>
     </section>

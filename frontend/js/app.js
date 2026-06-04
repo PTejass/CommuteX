@@ -697,6 +697,7 @@ async function fetchRecommendations(distance_km, weather, travel_type) {
 
         html += `</div>`;
         container.innerHTML = html;
+        container.classList.add('has-data');
 
     } catch (err) {
         console.error('Recommendations error:', err);
@@ -706,6 +707,61 @@ async function fetchRecommendations(distance_km, weather, travel_type) {
         `;
     }
 }
+
+
+// ========== What-If Scenario Controls ==========
+const whatifDistanceSlider = document.getElementById('whatif-distance');
+const whatifDistanceValue = document.getElementById('whatif-distance-value');
+const btnWhatif = document.getElementById('btn-whatif');
+
+/**
+ * Read current What-If parameter values from the UI controls
+ */
+function getWhatIfParams() {
+    const distance = parseFloat(whatifDistanceSlider.value);
+    const weather = document.querySelector('input[name="whatif-weather"]:checked')?.value || 'Any';
+    const travelType = document.querySelector('input[name="whatif-travel-type"]:checked')?.value || 'Solo';
+    return { distance, weather, travelType };
+}
+
+/**
+ * Update the slider fill gradient and displayed value label
+ */
+function updateSliderUI() {
+    const val = parseFloat(whatifDistanceSlider.value);
+    const min = parseFloat(whatifDistanceSlider.min);
+    const max = parseFloat(whatifDistanceSlider.max);
+    const pct = ((val - min) / (max - min)) * 100;
+
+    whatifDistanceValue.textContent = `${val} km`;
+    whatifDistanceSlider.style.setProperty('--slider-pct', `${pct}%`);
+}
+
+// Initialize slider UI on load
+updateSliderUI();
+
+// Update slider value display in real-time while dragging
+whatifDistanceSlider.addEventListener('input', updateSliderUI);
+
+// "Get Recommendations" button click
+btnWhatif.addEventListener('click', () => {
+    const { distance, weather, travelType } = getWhatIfParams();
+    fetchRecommendations(distance, weather, travelType);
+});
+
+// Also allow toggling the radio buttons to auto-refresh recommendations
+document.querySelectorAll('input[name="whatif-weather"], input[name="whatif-travel-type"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        const { distance, weather, travelType } = getWhatIfParams();
+        fetchRecommendations(distance, weather, travelType);
+    });
+});
+
+// Auto-fetch on slider release (mouseup/touchend) for a snappy feel
+whatifDistanceSlider.addEventListener('change', () => {
+    const { distance, weather, travelType } = getWhatIfParams();
+    fetchRecommendations(distance, weather, travelType);
+});
 
 
 // ========== Dynamic Response Count ==========
@@ -741,8 +797,8 @@ const animateOnScroll = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
-// Apply to all section headers and cards
-document.querySelectorAll('.section-header, .chart-card, .survey-form, .reco-placeholder').forEach(el => {
+// Apply to all section headers, cards, and What-If panel
+document.querySelectorAll('.section-header, .chart-card, .survey-form, .whatif-panel, .reco-results').forEach(el => {
     el.style.opacity = '0';
     el.style.transform = 'translateY(30px)';
     el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
@@ -754,5 +810,10 @@ document.querySelectorAll('.section-header, .chart-card, .survey-form, .reco-pla
 // Load dashboard data and charts
 loadDashboard();
 
+// Auto-load recommendations with default What-If values
+const initParams = getWhatIfParams();
+fetchRecommendations(initParams.distance, initParams.weather, initParams.travelType);
+
 console.log('🚌 CommuteX Frontend loaded successfully');
 console.log(`📡 API endpoint: ${API_CONFIG.BASE_URL}`);
+

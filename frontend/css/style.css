@@ -107,7 +107,9 @@
 .btn-secondary,
 .survey-form,
 .reco-placeholder,
+.reco-results,
 .reco-card,
+.whatif-panel,
 .toast,
 .footer {
     --clr-text-primary: #f0f9ff;
@@ -1049,6 +1051,232 @@ select.form-input {
     margin-top: var(--sp-2);
 }
 
+/* ---------- WHAT-IF SCENARIO PANEL ---------- */
+.whatif-panel {
+    max-width: 800px;
+    margin: 0 auto var(--sp-10);
+    background: var(--clr-bg-card);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-xl);
+    padding: var(--sp-10);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition-base);
+}
+
+.whatif-panel:hover {
+    border-color: rgba(14, 165, 233, 0.35);
+    box-shadow: 0 10px 48px rgba(14, 165, 233, 0.12);
+}
+
+.whatif-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-8);
+    padding-bottom: var(--sp-6);
+    border-bottom: 1px solid var(--clr-border);
+}
+
+.whatif-icon {
+    font-size: 2.5rem;
+    animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.whatif-title {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    color: var(--clr-text-primary);
+    margin-bottom: var(--sp-1);
+}
+
+.whatif-subtitle {
+    font-size: var(--fs-sm);
+    color: var(--clr-text-muted);
+    line-height: 1.5;
+}
+
+.whatif-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-8);
+}
+
+.whatif-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+}
+
+.whatif-label {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--clr-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+}
+
+.whatif-value {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-bold);
+    color: var(--clr-accent-1);
+    background: rgba(14, 165, 233, 0.1);
+    padding: var(--sp-1) var(--sp-3);
+    border-radius: var(--radius-full);
+    min-width: 70px;
+    text-align: center;
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    transition: var(--transition-fast);
+}
+
+/* Custom Range Slider */
+.whatif-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(
+        to right,
+        var(--clr-accent-1) 0%,
+        var(--clr-accent-1) var(--slider-pct, 18%),
+        rgba(14, 165, 233, 0.15) var(--slider-pct, 18%),
+        rgba(14, 165, 233, 0.15) 100%
+    );
+    outline: none;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.whatif-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--clr-accent-gradient);
+    cursor: grab;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4),
+                0 0 0 4px rgba(14, 165, 233, 0.1);
+    border: 3px solid #fff;
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+[data-theme="dark"] .whatif-slider::-webkit-slider-thumb {
+    border-color: var(--clr-bg-card);
+}
+
+.whatif-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 2px 12px rgba(14, 165, 233, 0.5),
+                0 0 0 6px rgba(14, 165, 233, 0.15);
+}
+
+.whatif-slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.05);
+}
+
+.whatif-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--clr-accent-gradient);
+    cursor: grab;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4),
+                0 0 0 4px rgba(14, 165, 233, 0.1);
+    border: 3px solid #fff;
+}
+
+.whatif-range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--fs-xs);
+    color: var(--clr-text-muted);
+    margin-top: var(--sp-1);
+}
+
+/* Toggle Button Group */
+.whatif-toggle-group {
+    display: flex;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+}
+
+.whatif-toggle-option {
+    cursor: pointer;
+    flex: 1;
+    min-width: 100px;
+}
+
+.whatif-toggle-option input[type="radio"] {
+    display: none;
+}
+
+.whatif-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-5);
+    border: 2px solid var(--clr-border);
+    border-radius: var(--radius-lg);
+    background: var(--clr-bg-input);
+    color: var(--clr-text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    transition: all var(--transition-base);
+    text-align: center;
+    user-select: none;
+}
+
+.whatif-toggle-btn:hover {
+    border-color: var(--clr-accent-2);
+    color: var(--clr-text-primary);
+    background: rgba(14, 165, 233, 0.05);
+}
+
+.whatif-toggle-option input[type="radio"]:checked + .whatif-toggle-btn {
+    border-color: var(--clr-accent-1);
+    background: rgba(14, 165, 233, 0.12);
+    color: var(--clr-accent-1);
+    font-weight: var(--fw-semibold);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1),
+                0 4px 12px rgba(14, 165, 233, 0.15);
+}
+
+.whatif-toggle-icon {
+    font-size: var(--fs-lg);
+    line-height: 1;
+}
+
+/* Actions */
+.whatif-actions {
+    margin-top: var(--sp-8);
+    display: flex;
+    justify-content: center;
+}
+
+/* Results Container */
+.reco-results {
+    text-align: center;
+    padding: var(--sp-12) var(--sp-6);
+    border: 2px dashed var(--clr-border);
+    border-radius: var(--radius-xl);
+    background: var(--clr-bg-card);
+    transition: var(--transition-base);
+}
+
+.reco-results.has-data {
+    text-align: left;
+    border-style: solid;
+    border-color: rgba(14, 165, 233, 0.15);
+    padding: var(--sp-8);
+}
+
 /* ---------- TOAST NOTIFICATIONS ---------- */
 .toast-container {
     position: fixed;
@@ -1221,6 +1449,24 @@ select.form-input {
         min-width: 90px;
         padding: var(--sp-3) var(--sp-4);
     }
+
+    .whatif-panel {
+        padding: var(--sp-6);
+    }
+
+    .whatif-toggle-group {
+        flex-direction: column;
+    }
+
+    .whatif-toggle-option {
+        min-width: unset;
+    }
+
+    .whatif-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
 
     .section-title {
         font-size: var(--fs-2xl);
