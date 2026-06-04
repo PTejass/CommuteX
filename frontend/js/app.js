@@ -115,6 +115,28 @@ function updateActiveNav() {
 
 window.addEventListener('scroll', updateActiveNav);
 
+// ========== Theme Toggle Logic ==========
+const themeToggleBtn = document.getElementById('theme-toggle');
+const rootElement = document.documentElement;
+
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark') {
+    rootElement.setAttribute('data-theme', 'dark');
+}
+
+themeToggleBtn.addEventListener('click', () => {
+    const currentTheme = rootElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    rootElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+
+    applyChartDefaults();
+    if (barChart) barChart.update();
+    if (pieChart) pieChart.update();
+    if (scatterChart) scatterChart.update();
+});
+
 // ========== Form Validation ==========
 const form = document.getElementById('survey-form');
 const btnSubmit = document.getElementById('btn-submit');
@@ -345,11 +367,13 @@ const MODE_COLORS = {
 
 const ALL_MODES = ['Bus', 'Bike', 'Car', 'Metro', 'Auto', 'Walking'];
 
-// Chart.js global defaults for dark theme
+// Chart.js global defaults for dark/light theme
 function applyChartDefaults() {
     if (typeof Chart === 'undefined') return;
-    Chart.defaults.color = '#64748b';
-    Chart.defaults.borderColor = 'rgba(14, 165, 233, 0.1)';
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    Chart.defaults.color = isDark ? '#bae6fd' : '#64748b';
+    Chart.defaults.borderColor = isDark ? 'rgba(186, 230, 253, 0.15)' : 'rgba(14, 165, 233, 0.1)';
     Chart.defaults.font.family = "'Poppins', sans-serif";
 }
 
