@@ -79,6 +79,12 @@
                         <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                 </a>
+                <a href="#recommendations-section" class="btn btn-secondary" id="cta-recommendations">
+                    <span>Smart Recommendations</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6" />
+                    </svg>
+                </a>
             </div>
             <div class="hero-stats">
                 <div class="stat-card">
@@ -327,6 +333,18 @@
                     <!-- Location Input -->
                     <div class="whatif-group" id="whatif-location-group">
                         <label class="whatif-label">📍 Your Location</label>
+                        <div class="preset-location-container">
+                            <select id="select-preset-location" class="location-preset-dropdown">
+                                <option value="">-- Select Bangalore Location Preset --</option>
+                                <option value="majestic">Majestic (Bus Station / Railway Hub)</option>
+                                <option value="mgroad">MG Road (City Center / Metro Station)</option>
+                                <option value="indiranagar">Indiranagar (Metro Hub)</option>
+                                <option value="koramangala">Koramangala (Sony World Signal)</option>
+                                <option value="jayanagar">Jayanagar 4th Block</option>
+                                <option value="ecity">Electronic City (Phase 1 Toll)</option>
+                                <option value="hebbal">Hebbal Flyover (North Bengaluru)</option>
+                            </select>
+                        </div>
                         <div class="location-input-row">
                             <div class="coords-inputs">
                                 <input type="number" id="input-lat" class="location-coord-field" placeholder="Latitude (e.g. 12.97)" step="any" min="-90" max="90">

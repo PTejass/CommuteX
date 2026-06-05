@@ -1,7 +1,4 @@
-/* =====================================================
-   Analytics Route — GET /api/analytics
-   Returns aggregated analytics data for the dashboard
-   ===================================================== */
+
 
 const express = require('express');
 const router = express.Router();
@@ -60,7 +57,7 @@ router.get('/', async (req, res) => {
                 total_responses += parseInt(row.response_count, 10);
                 mode_frequency[row.transport_mode] = parseInt(row.response_count, 10);
                 mode_distribution_percent[row.transport_mode] = parseFloat(row.pct_of_total);
-                
+
                 statistics[row.transport_mode] = {
                     avg_distance_km: parseFloat(row.avg_distance_km),
                     avg_travel_time_min: parseFloat(row.avg_travel_time_min),

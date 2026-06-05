@@ -790,6 +790,18 @@ const transitResults = document.getElementById('transit-results');
 const inputLat = document.getElementById('input-lat');
 const inputLng = document.getElementById('input-lng');
 const btnSearchCoords = document.getElementById('btn-search-coords');
+const selectPresetLocation = document.getElementById('select-preset-location');
+
+// Bangalore Preset Coordinates
+const BANGALORE_PRESETS = {
+    majestic: { lat: 12.9776, lng: 77.5729 },
+    mgroad: { lat: 12.9754, lng: 77.6067 },
+    indiranagar: { lat: 12.9784, lng: 77.6408 },
+    koramangala: { lat: 12.9344, lng: 77.6244 },
+    jayanagar: { lat: 12.9284, lng: 77.5913 },
+    ecity: { lat: 12.8494, lng: 77.6644 },
+    hebbal: { lat: 13.0358, lng: 77.5971 },
+};
 
 function setLocationStatus(text, state) {
     locationStatus.textContent = text;
@@ -876,6 +888,9 @@ async function lookupNearbyTransit(lat, lng) {
  * Handle manual coordinates search
  */
 btnSearchCoords.addEventListener('click', () => {
+    // Reset preset dropdown selection to show coordinates are custom
+    selectPresetLocation.value = "";
+
     const latVal = parseFloat(inputLat.value);
     const lngVal = parseFloat(inputLng.value);
 
@@ -910,6 +925,30 @@ btnSearchCoords.addEventListener('click', () => {
 });
 
 /**
+ * Handle preset locations selection
+ */
+selectPresetLocation.addEventListener('change', () => {
+    const key = selectPresetLocation.value;
+    if (!key) return; // Ignore if "-- Select --" chosen
+
+    const coords = BANGALORE_PRESETS[key];
+    if (!coords) return;
+
+    // Autofill fields
+    inputLat.value = coords.lat.toFixed(5);
+    inputLng.value = coords.lng.toFixed(5);
+
+    // Show coordinates badge
+    coordBadge.textContent = `📍 ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`;
+    locationCoords.style.display = 'block';
+
+    setLocationStatus(`Preset: ${selectPresetLocation.options[selectPresetLocation.selectedIndex].text}`, 'found');
+
+    // Trigger proximity lookup
+    lookupNearbyTransit(coords.lat, coords.lng);
+});
+
+/**
  * Handle "Use My Location" button click
  */
 btnUseLocation.addEventListener('click', () => {
@@ -917,6 +956,9 @@ btnUseLocation.addEventListener('click', () => {
         setLocationStatus('Geolocation is not supported by your browser.', 'error');
         return;
     }
+
+    // Reset preset dropdown selection
+    selectPresetLocation.value = "";
 
     // Show loading state
     btnUseLocation.classList.add('locating');
